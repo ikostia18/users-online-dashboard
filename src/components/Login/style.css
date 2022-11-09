@@ -1,0 +1,20 @@
+.login-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.login-header {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 1.5rem;
+  margin: 1rem 0;
+}
+
+.input {
+  margin-top: 5px;
+}
+
+.login-button {
+  margin: 1rem 0;
+}
