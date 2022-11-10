@@ -1,15 +1,25 @@
 import { useState } from 'react';
 import { getDocs } from 'firebase/firestore';
 import { usersCollectionRef } from '../../lib/firestore.collections';
-import './style.css';
 import { useNavigate } from 'react-router-dom';
+import './style.css';
 
 export default function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [IPv6, setIPv6] = useState('');
   const [isLoginFail, setIsLoginFail] = useState(false);
 
   const navigate = useNavigate();
+
+  const getLocation = () => {
+    const url = `https://api.geoapify.com/v1/ipinfo?&apiKey=${process.env.REACT_APP_GEOAPIFY_API_KEY}`;
+    console.log(url);
+    fetch(url)
+      .then((response) => response.json())
+      .then((result) => setIPv6(result.ip))
+      .catch((error) => console.error('error', error));
+  };
 
   const handleLogin = () => {
     getDocs(usersCollectionRef)
@@ -24,8 +34,22 @@ export default function Login() {
         );
 
         if (AuthSucceed.length > 0) {
+          getLocation();
+
+          const navState = {
+            name,
+            email,
+            IPv6,
+            time: new Date(),
+          };
+
+          // update isLogin
+          // update ip
+          // update enter time
+          // update visitCounts ++
+
           setIsLoginFail(false);
-          navigate('/list-users');
+          navigate('/list-users', { state: navState });
         }
         setIsLoginFail(true);
       })
