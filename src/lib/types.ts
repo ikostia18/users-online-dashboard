@@ -1,4 +1,4 @@
-export interface IUserDocumentData {
+export interface IUserEditableDocumentData {
   email?: string;
   entranceTime?: Date;
   ip?: string;

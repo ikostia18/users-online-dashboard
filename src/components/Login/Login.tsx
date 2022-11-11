@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDocs, updateDoc } from 'firebase/firestore';
 import { usersCollectionRef } from '../../lib/firestore.collections';
-import { IUserDocumentData } from '../../lib/types';
+import { IUserEditableDocumentData } from '../../lib/types';
 import { db } from '../../lib/firebase-init';
 import './style.css';
 
@@ -28,7 +28,7 @@ export default function Login() {
     visitsCount: number,
     IPv6: string
   ) => {
-    const editUser: IUserDocumentData = {
+    const editUser: IUserEditableDocumentData = {
       ip: IPv6,
       isLoggedIn: true,
       entranceTime: new Date(),

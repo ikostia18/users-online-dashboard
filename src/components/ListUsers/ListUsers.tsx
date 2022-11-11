@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DocumentData, getDocs, onSnapshot } from 'firebase/firestore';
 import { usersCollectionRef } from '../../lib/firestore.collections';
 import './style.css';
-import { useLocation } from 'react-router-dom';
+import Popup from '../Popup/Popup';
 
 export default function ListUsers() {
   const [users, setUsers] = useState<{ data: DocumentData; id: string }[]>();
   const [isRealTime, setIsRealTime] = useState(true);
+  const [openPopup, setOpenPopup] = useState(false);
+  const [popupData, setPopupData] = useState<DocumentData>();
 
   const { state } = useLocation();
 
@@ -57,7 +60,10 @@ export default function ListUsers() {
     setIsRealTime(updateType === 'Realtime' ? true : false);
   };
 
-  const handleUserClick = () => {};
+  const handleUserClick = (data: DocumentData) => {
+    setPopupData(data);
+    setOpenPopup(true);
+  };
 
   return (
     <div className="dashbard-wrapper">
@@ -99,7 +105,7 @@ export default function ListUsers() {
               user.data.isLoggedIn && (
                 <div
                   className="user-info-wrapper"
-                  onClick={handleUserClick}
+                  onClick={() => handleUserClick(user.data)}
                   key={user.id}
                 >
                   <span>
@@ -116,19 +122,13 @@ export default function ListUsers() {
                     &nbsp;| User IP:&nbsp;
                     <span className="inner-info">{user.data.ip}</span>
                   </span>
-
-                  {/* {user.data.entranceTime}
-                   */}
-                  {/* within the popup
-            {user.data.name}
-            {user.data.email}
-            {user.data.userAgent}
-            {user.data.entranceTime}
-          {user.data.visitsCount} */}
                 </div>
               )
           )}
       </div>
+      {openPopup && popupData ? (
+        <Popup data={popupData} closePopup={() => setOpenPopup(false)} />
+      ) : null}
     </div>
   );
 }
