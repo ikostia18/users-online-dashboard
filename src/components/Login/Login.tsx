@@ -1,40 +1,71 @@
 import { useState } from 'react';
-import { getDocs } from 'firebase/firestore';
-import { usersCollectionRef } from '../../lib/firestore.collections';
 import { useNavigate } from 'react-router-dom';
+import { doc, getDocs, updateDoc } from 'firebase/firestore';
+import { usersCollectionRef } from '../../lib/firestore.collections';
+import { IUserDocumentData } from '../../lib/types';
+import { db } from '../../lib/firebase-init';
 import './style.css';
 
 export default function Login() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [IPv6, setIPv6] = useState('');
   const [isLoginFail, setIsLoginFail] = useState(false);
 
   const navigate = useNavigate();
 
   const getLocation = () => {
     const url = `https://api.geoapify.com/v1/ipinfo?&apiKey=${process.env.REACT_APP_GEOAPIFY_API_KEY}`;
-    console.log(url);
-    fetch(url)
+    return fetch(url)
       .then((response) => response.json())
-      .then((result) => setIPv6(result.ip))
+      .then((result) => {
+        return result;
+      })
+      .catch((error) => console.error('error', error));
+  };
+
+  const updateUserDocument = (
+    userId: string,
+    visitsCount: number,
+    IPv6: string
+  ) => {
+    const editUser: IUserDocumentData = {
+      ip: IPv6,
+      isLoggedIn: true,
+      entranceTime: new Date(),
+      visitsCount: visitsCount + 1,
+    };
+
+    const docRef = doc(db, 'users', userId);
+    updateDoc(docRef, editUser)
+      .then((response) => {
+        console.log(response);
+      })
       .catch((error) => console.error('error', error));
   };
 
   const handleLogin = () => {
     getDocs(usersCollectionRef)
-      .then((response) => {
+      .then(async (response) => {
         const usersRes = response.docs.map((doc) => ({
           data: doc.data(),
           id: doc.id,
         }));
 
-        const AuthSucceed = usersRes.filter(
-          (user) => user.data.name === name && user.data.email === email
+        const userAuthSucceed = usersRes.filter(
+          (user) =>
+            user.data.name === name &&
+            user.data.email.toLowerCase() === email.toLowerCase()
         );
 
-        if (AuthSucceed.length > 0) {
-          getLocation();
+        if (userAuthSucceed.length > 0) {
+          const locationResponse = await getLocation();
+          const IPv6 = locationResponse.ip;
+
+          updateUserDocument(
+            userAuthSucceed[0].id,
+            userAuthSucceed[0].data.visitsCount,
+            IPv6
+          );
 
           const navState = {
             name,
@@ -42,11 +73,6 @@ export default function Login() {
             IPv6,
             time: new Date(),
           };
-
-          // update isLogin
-          // update ip
-          // update enter time
-          // update visitCounts ++
 
           setIsLoginFail(false);
           navigate('/list-users', { state: navState });
