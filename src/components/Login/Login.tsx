@@ -38,7 +38,7 @@ export default function Login() {
     const docRef = doc(db, 'users', userId);
     updateDoc(docRef, editUser)
       .then((response) => {
-        console.log(response);
+        console.info(response);
       })
       .catch((error) => console.error('error', error));
   };
@@ -68,6 +68,7 @@ export default function Login() {
           );
 
           const navState = {
+            id: userAuthSucceed[0].id,
             name,
             email,
             IPv6,
@@ -82,6 +83,7 @@ export default function Login() {
       .catch((error) => {
         setIsLoginFail(true);
         console.error(error.message);
+        alert(error.message);
       });
   };
 

@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DocumentData, getDocs, onSnapshot } from 'firebase/firestore';
-import { usersCollectionRef } from '../../lib/firestore.collections';
-import './style.css';
 import Popup from '../Popup/Popup';
+import {
+  doc,
+  DocumentData,
+  getDocs,
+  onSnapshot,
+  updateDoc,
+} from 'firebase/firestore';
+import { IUserEditableDocumentData } from '../../lib/types';
+import { usersCollectionRef } from '../../lib/firestore.collections';
+import { db } from '../../lib/firebase-init';
+import './style.css';
 
 export default function ListUsers() {
+  const [userId, setUserId] = useState('');
   const [users, setUsers] = useState<{ data: DocumentData; id: string }[]>();
-  const [isRealTime, setIsRealTime] = useState(true);
+  const [isRealTime, setIsRealTime] = useState(false);
   const [openPopup, setOpenPopup] = useState(false);
   const [popupData, setPopupData] = useState<DocumentData>();
 
   const { state } = useLocation();
 
   useEffect(() => {
+    setUserId(state.id);
     getUsers();
   }, []);
 
@@ -24,9 +34,12 @@ export default function ListUsers() {
       if (users) {
         interval = setInterval(getUsers, 3000);
       }
-      return () => clearInterval(interval);
+      return () => {
+        updateUserDocument(userId);
+        clearInterval(interval);
+      };
     }
-  }, [users]);
+  }, []);
 
   // Realtime listener to users collection updates
   useEffect(() => {
@@ -37,10 +50,11 @@ export default function ListUsers() {
         );
       });
       return () => {
+        updateUserDocument(userId);
         unsubscribe();
       };
     }
-  }, [users]);
+  }, []);
 
   const getUsers = () => {
     getDocs(usersCollectionRef)
@@ -52,6 +66,19 @@ export default function ListUsers() {
         setUsers(usersRes);
       })
       .catch((error) => console.error(error.message));
+  };
+
+  const updateUserDocument = (userId: string) => {
+    const editUser: IUserEditableDocumentData = {
+      isLoggedIn: false,
+    };
+
+    const docRef = doc(db, 'users', userId);
+    updateDoc(docRef, editUser)
+      .then((response) => {
+        console.info(response);
+      })
+      .catch((error) => console.error('error', error));
   };
 
   const onOptionChange = (e: React.ChangeEvent<HTMLElement>) => {
