@@ -5,11 +5,24 @@
 .welcome-main-header {
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 1.5rem;
-  margin: 1rem 0;
 }
 
 .welcome-user {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: 1.1rem;
+}
+
+.top-space {
   margin: 1rem 0;
+}
+
+.inner-info {
+  font-weight: 600;
+  color: #2850d7;
+}
+
+.user-info-wrapper {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  padding: 4px 0;
+  cursor: pointer;
 }
