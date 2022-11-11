@@ -9,8 +9,6 @@ export default function ListUsers() {
 
   const { state } = useLocation();
 
-  // console.log(state); // {name: 'Bob', email: 'bob@dash.com'}
-
   useEffect(() => {
     getUsers();
   }, []);
@@ -39,30 +37,52 @@ export default function ListUsers() {
       .catch((error) => console.error(error.message));
   };
 
+  const handleUserClick = () => {};
+
   return (
     <div className="dashbard-wrapper">
-      <div className="welcome-main-header">Live users Dashboard</div>
-      <div className="welcome-user">
+      <div className="welcome-main-header top-space">Live users Dashboard</div>
+      <div className="welcome-user top-space">
         Hello and welcome {state.name}, {state.email}
       </div>
+      <div className="top-space">The following users currently are online:</div>
 
-      {/* <button onClick={() => getUsers()}>Refresh Users</button> */}
       <div>
         {users &&
-          users?.map((user) => (
-            <div key={user.id}>
-              {user.data.name}
-              {/* {user.data.entranceTime}
-              {user.data.ip} */}
+          users?.map(
+            (user) =>
+              user.data.isLoggedIn && (
+                <div
+                  className="user-info-wrapper"
+                  onClick={handleUserClick}
+                  key={user.id}
+                >
+                  <span>
+                    &nbsp;Name:&nbsp;
+                    <span className="inner-info">{user.data.name}</span>
+                  </span>
+                  <span>
+                    &nbsp;| Entrance Time:&nbsp;
+                    <span className="inner-info">
+                      {user.data.entranceTime.toDate().toTimeString()}
+                    </span>
+                  </span>
+                  <span>
+                    &nbsp;| User IP:&nbsp;
+                    <span className="inner-info">{user.data.ip}</span>
+                  </span>
 
-              {/* within the popup
-              {user.data.name}
-              {user.data.email}
-              {user.data.userAgent}
-              {user.data.entranceTime}
-              {user.data.visitsCount} */}
-            </div>
-          ))}
+                  {/* {user.data.entranceTime}
+                   */}
+                  {/* within the popup
+            {user.data.name}
+            {user.data.email}
+            {user.data.userAgent}
+            {user.data.entranceTime}
+          {user.data.visitsCount} */}
+                </div>
+              )
+          )}
       </div>
     </div>
   );
