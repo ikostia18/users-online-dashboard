@@ -35,7 +35,10 @@ export default function ListUsers() {
         interval = setInterval(getUsers, 3000);
       }
       return () => {
-        updateUserDocument(userId);
+        if (userId) {
+          updateUserDocument(userId);
+        }
+
         clearInterval(interval);
       };
     }
@@ -50,7 +53,9 @@ export default function ListUsers() {
         );
       });
       return () => {
-        updateUserDocument(userId);
+        if (userId) {
+          updateUserDocument(userId);
+        }
         unsubscribe();
       };
     }
