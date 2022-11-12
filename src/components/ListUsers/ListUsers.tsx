@@ -14,7 +14,6 @@ import { db } from '../../lib/firebase-init';
 import './style.css';
 
 export default function ListUsers() {
-  const [userId, setUserId] = useState('');
   const [users, setUsers] = useState<{ data: DocumentData; id: string }[]>();
   const [isRealTime, setIsRealTime] = useState(false);
   const [openPopup, setOpenPopup] = useState(false);
@@ -23,39 +22,45 @@ export default function ListUsers() {
   const { state } = useLocation();
 
   useEffect(() => {
-    setUserId(state.id);
-    getUsers();
-  }, []);
+    const updateUserDocument = (userId: string) => {
+      const editUser: IUserEditableDocumentData = {
+        isLoggedIn: false,
+      };
 
-  // Update users collection data every 3 sec
-  useEffect(() => {
+      const docRef = doc(db, 'users', userId);
+      updateDoc(docRef, editUser)
+        .then((response) => {
+          console.info(response);
+        })
+        .catch((error) => console.error('error', error));
+    };
+
+    getUsers();
+    window.addEventListener('beforeunload', () => updateUserDocument(state.id));
+
     if (!isRealTime) {
+      // Update users collection data every 3 sec
       let interval: NodeJS.Timer;
       if (users) {
         interval = setInterval(getUsers, 3000);
       }
       return () => {
-        if (userId) {
-          updateUserDocument(userId);
-        }
-
+        window.removeEventListener('beforeunload', () =>
+          updateUserDocument(state.id)
+        );
         clearInterval(interval);
       };
-    }
-  }, []);
-
-  // Realtime listener to users collection updates
-  useEffect(() => {
-    if (isRealTime) {
+    } else {
+      // Realtime listener to users collection updates
       const unsubscribe = onSnapshot(usersCollectionRef, (snapshot) => {
         setUsers(
           snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() }))
         );
       });
       return () => {
-        if (userId) {
-          updateUserDocument(userId);
-        }
+        window.removeEventListener('beforeunload', () =>
+          updateUserDocument(state.id)
+        );
         unsubscribe();
       };
     }
@@ -71,19 +76,6 @@ export default function ListUsers() {
         setUsers(usersRes);
       })
       .catch((error) => console.error(error.message));
-  };
-
-  const updateUserDocument = (userId: string) => {
-    const editUser: IUserEditableDocumentData = {
-      isLoggedIn: false,
-    };
-
-    const docRef = doc(db, 'users', userId);
-    updateDoc(docRef, editUser)
-      .then((response) => {
-        console.info(response);
-      })
-      .catch((error) => console.error('error', error));
   };
 
   const onOptionChange = (e: React.ChangeEvent<HTMLElement>) => {
